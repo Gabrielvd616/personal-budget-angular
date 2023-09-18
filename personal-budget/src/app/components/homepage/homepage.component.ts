@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Chart } from 'chart.js';
-import { HttpClient } from '@angular/common/http';
+import { change } from './d3chart.js';
+import * as d3 from './d3.v3.min.js';
+import { DataService } from '../../services/data/data.service';
 
 @Component({
   selector: 'pb-homepage',
@@ -26,15 +28,21 @@ export class HomepageComponent implements OnInit {
     labels: [],
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
-    this.http.get('http://localhost:3001/budget').subscribe((res: any) => {
+    this.dataService.getBudget().subscribe((res: any) => {
       for (var i = 0; i < res.myBudget.length; i++) {
         this.dataSource.datasets[0].data[i] = res.myBudget[i].budget;
         this.dataSource.labels[i] = res.myBudget[i].title;
         this.createChart();
       }
+      change(
+        res.myBudget.map((item) => {
+          return { label: item.title, value: item.budget };
+        }),
+        d3
+      );
     });
   }
 
